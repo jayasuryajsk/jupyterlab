@@ -29,7 +29,7 @@
   "files": [
     "lib/*.{d.ts,js,js.map}",
     "style/*.css",
-    "src/**/*.ts"
+    "src/**/*.{ts,tsx}"
   ],
   "scripts": {
     "build": "tsc -b",

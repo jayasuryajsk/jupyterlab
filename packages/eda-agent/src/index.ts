@@ -3,17 +3,26 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { INotebookModel, INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
+import {
+  INotebookModel,
+  INotebookTracker,
+  NotebookPanel
+} from '@jupyterlab/notebook';
 import { ToolbarButton } from '@jupyterlab/apputils';
-import { Widget } from '@lumino/widgets';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
+import { ChatPanel } from './chat-panel';
 
 /**
  * A widget extension that adds a Start Agent button to the notebook toolbar.
  */
-class StartButtonExtension implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel> {
-  createNew(panel: NotebookPanel, context: DocumentRegistry.IContext<INotebookModel>): IDisposable {
+class StartButtonExtension
+  implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel>
+{
+  createNew(
+    panel: NotebookPanel,
+    context: DocumentRegistry.IContext<INotebookModel>
+  ): IDisposable {
     const button = new ToolbarButton({
       label: 'Start Agent',
       onClick: () => {
@@ -35,16 +44,30 @@ const plugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/eda-agent:plugin',
   autoStart: true,
   requires: [INotebookTracker],
-  activate: (app: JupyterFrontEnd, tracker: INotebookTracker) => {
+  activate: (app: JupyterFrontEnd, _tracker: INotebookTracker) => {
     console.log('JupyterLab extension eda-agent is activated!');
 
-    // Create and add the side panel
-    const content = new Widget();
-    content.id = 'eda-agent-panel';
-    content.title.label = 'EDA Agent';
-    content.title.closable = true;
-    content.addClass('jp-EDAAgentPanel');
-    app.shell.add(content, 'left', { rank: 900 });
+    // Create and add the chat panel
+    const chatPanel = new ChatPanel();
+    chatPanel.id = 'eda-agent-chat-panel';
+    chatPanel.title.label = 'EDA Chat';
+    chatPanel.title.closable = true;
+    app.shell.add(chatPanel, 'right');
+
+    // Command to toggle the chat panel visibility
+    app.commands.addCommand('eda-agent:toggle-chat', {
+      label: 'Toggle EDA Chat',
+      execute: () => {
+        if (!chatPanel.isAttached) {
+          app.shell.add(chatPanel, 'right');
+        } else if (chatPanel.isHidden) {
+          chatPanel.show();
+          app.shell.activateById(chatPanel.id);
+        } else {
+          chatPanel.hide();
+        }
+      }
+    });
 
     // Add the notebook toolbar button
     app.docRegistry.addWidgetExtension('Notebook', new StartButtonExtension());
