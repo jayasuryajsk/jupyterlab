@@ -3,7 +3,11 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { INotebookModel, INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
+import {
+  INotebookModel,
+  INotebookTracker,
+  NotebookPanel
+} from '@jupyterlab/notebook';
 import { ToolbarButton } from '@jupyterlab/apputils';
 import { Widget } from '@lumino/widgets';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
@@ -12,12 +16,21 @@ import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 /**
  * A widget extension that adds a Start Agent button to the notebook toolbar.
  */
-class StartButtonExtension implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel> {
-  createNew(panel: NotebookPanel, context: DocumentRegistry.IContext<INotebookModel>): IDisposable {
+class StartButtonExtension
+  implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel>
+{
+  constructor(app: JupyterFrontEnd) {
+    this._app = app;
+  }
+
+  createNew(
+    panel: NotebookPanel,
+    context: DocumentRegistry.IContext<INotebookModel>
+  ): IDisposable {
     const button = new ToolbarButton({
       label: 'Start Agent',
       onClick: () => {
-        console.log('Agent Started');
+        void this._app.commands.execute('eda-agent:start-interactive');
       },
       tooltip: 'Start Agent'
     });
@@ -26,6 +39,8 @@ class StartButtonExtension implements DocumentRegistry.IWidgetExtension<Notebook
       button.dispose();
     });
   }
+
+  private _app: JupyterFrontEnd;
 }
 
 /**
@@ -46,8 +61,32 @@ const plugin: JupyterFrontEndPlugin<void> = {
     content.addClass('jp-EDAAgentPanel');
     app.shell.add(content, 'left', { rank: 900 });
 
+    const queuePlanningLoop = () => {
+      void Promise.resolve().then(() => {
+        console.log('Planning loop queued');
+      });
+    };
+
+    app.commands.addCommand('eda-agent:start-autonomous', {
+      label: 'Start EDA Agent (Autonomous)',
+      execute: () => {
+        queuePlanningLoop();
+      }
+    });
+
+    app.commands.addCommand('eda-agent:start-interactive', {
+      label: 'Start EDA Agent (Interactive)',
+      execute: () => {
+        app.shell.activateById(content.id);
+        console.log('Interactive mode ready. Awaiting user input.');
+      }
+    });
+
     // Add the notebook toolbar button
-    app.docRegistry.addWidgetExtension('Notebook', new StartButtonExtension());
+    app.docRegistry.addWidgetExtension(
+      'Notebook',
+      new StartButtonExtension(app)
+    );
   }
 };
 
