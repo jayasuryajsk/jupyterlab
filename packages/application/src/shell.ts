@@ -151,6 +151,21 @@ export namespace ILabShell {
   }
 
   /**
+   * Options when registering an optional panel module.
+   */
+  export interface IModuleOptions {
+    /**
+     * Unique identifier for the module. Defaults to the widget id.
+     */
+    id?: string;
+
+    /**
+     * Rank used to order the module relative to its siblings.
+     */
+    rank?: number;
+  }
+
+  /**
    * Mapping of widget type identifier and their user customized position
    */
   export interface IUserLayout {
@@ -467,6 +482,12 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     // Catch current changed events on the side handlers.
     this._leftHandler.updated.connect(this._onLayoutModified, this);
     this._rightHandler.updated.connect(this._onLayoutModified, this);
+    this._leftHandler.updated.connect(() => {
+      this._layoutHooks.emit('left');
+    }, this);
+    this._rightHandler.updated.connect(() => {
+      this._layoutHooks.emit('right');
+    }, this);
 
     // Catch update events on the horizontal split panel
     this._hsplitPanel.updated.connect(this._onLayoutModified, this);
@@ -582,6 +603,13 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    */
   get layoutModified(): ISignal<this, void> {
     return this._layoutModified;
+  }
+
+  /**
+   * A signal emitted for layout hooks when a shell area changes.
+   */
+  get layoutHooks(): ISignal<this, ILabShell.Area> {
+    return this._layoutHooks;
   }
 
   /**
@@ -1033,6 +1061,50 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   }
 
   /**
+   * Toggle visibility of a widget in header, top or bottom area.
+   */
+  togglePanelModule(
+    area: 'header' | 'top' | 'bottom',
+    id: string,
+    visible?: boolean
+  ): void {
+    const modules = this._panelModules[area];
+    const mod = modules.get(id);
+    if (!mod) {
+      return;
+    }
+    const show = visible !== false;
+    mod.visible = show;
+    mod.widget.setHidden(!show);
+    this._refreshPanelVisibility(area);
+    this._layoutHooks.emit(area);
+    this._onLayoutModified();
+  }
+
+  /**
+   * Set the ordering rank of a widget in header, top or bottom area.
+   */
+  setPanelModuleRank(
+    area: 'header' | 'top' | 'bottom',
+    id: string,
+    rank: number
+  ): void {
+    const modules = this._panelModules[area];
+    const mod = modules.get(id);
+    if (!mod) {
+      return;
+    }
+    mod.rank = rank;
+    if (area === 'top') {
+      this._topHandler.addWidget(mod.widget, rank);
+    } else {
+      this._syncPanelLayout(area);
+    }
+    this._layoutHooks.emit(area);
+    this._onLayoutModified();
+  }
+
+  /**
    * Collapse the left area.
    */
   collapseLeft(): void {
@@ -1045,6 +1117,19 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    */
   collapseRight(): void {
     this._rightHandler.collapse();
+    this._onLayoutModified();
+  }
+
+  /**
+   * Enable or disable overlay mode for sidebars.
+   *
+   * @param side - Sidebar identifier ('left' or 'right').
+   * @param overlay - Whether the sidebar should overlay the main area.
+   */
+  setSideBarOverlay(side: 'left' | 'right', overlay: boolean): void {
+    const handler = side === 'left' ? this._leftHandler : this._rightHandler;
+    handler.overlay = overlay;
+    this._layoutHooks.emit(side);
     this._onLayoutModified();
   }
 
@@ -1551,11 +1636,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     }
     options = options || {};
     const rank = options.rank ?? DEFAULT_RANK;
-    this._topHandler.addWidget(widget, rank);
-    this._onLayoutModified();
-    if (this._topHandler.panel.isHidden) {
-      this._topHandler.panel.show();
-    }
+    this._registerPanelModule('top', widget, rank);
   }
 
   /**
@@ -1595,13 +1676,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       console.error('Widgets added to app shell must have unique id property.');
       return;
     }
-    // Temporary: widgets are added to the panel in order of insertion.
-    this._headerPanel.addWidget(widget);
-    this._onLayoutModified();
-
-    if (this._headerPanel.isHidden) {
-      this._headerPanel.show();
-    }
+    const rank = options?.rank ?? DEFAULT_RANK;
+    this._registerPanelModule('header', widget, rank);
   }
   /**
    * Add a widget to the bottom content area.
@@ -1617,13 +1693,57 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       console.error('Widgets added to app shell must have unique id property.');
       return;
     }
-    // Temporary: widgets are added to the panel in order of insertion.
-    this._bottomPanel.addWidget(widget);
-    this._onLayoutModified();
+    const rank = options?.rank ?? DEFAULT_RANK;
+    this._registerPanelModule('bottom', widget, rank);
+  }
 
-    if (this._bottomPanel.isHidden) {
-      this._bottomPanel.show();
+  /**
+   * Register a widget as a panel module for a given area.
+   */
+  private _registerPanelModule(
+    area: 'header' | 'top' | 'bottom',
+    widget: Widget,
+    rank: number
+  ): void {
+    const modules = this._panelModules[area];
+    modules.set(widget.id, { id: widget.id, widget, rank, visible: true });
+    if (area === 'top') {
+      this._topHandler.addWidget(widget, rank);
+    } else {
+      this._syncPanelLayout(area);
     }
+    this._refreshPanelVisibility(area);
+    this._layoutHooks.emit(area);
+    this._onLayoutModified();
+  }
+
+  /**
+   * Synchronize panel layout for header and bottom areas.
+   */
+  private _syncPanelLayout(area: 'header' | 'bottom'): void {
+    const panel = area === 'header' ? this._headerPanel : this._bottomPanel;
+    const modules = Array.from(this._panelModules[area].values()).sort(
+      Private.itemCmp
+    );
+    modules.forEach((m, i) => {
+      panel.insertWidget(i, m.widget);
+      m.widget.setHidden(!m.visible);
+    });
+  }
+
+  /**
+   * Refresh visibility of an optional panel area based on its modules.
+   */
+  private _refreshPanelVisibility(area: 'header' | 'top' | 'bottom'): void {
+    const modules = Array.from(this._panelModules[area].values());
+    const panel =
+      area === 'top'
+        ? this._topHandler.panel
+        : area === 'header'
+        ? this._headerPanel
+        : this._bottomPanel;
+    const visible = modules.some(m => m.visible !== false);
+    panel.setHidden(!visible);
   }
 
   private _addToDownArea(
@@ -1753,6 +1873,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    */
   private _onLayoutModified(): void {
     void this._layoutDebouncer.invoke();
+    this._layoutHooks.emit('main');
   }
 
   /**
@@ -1793,6 +1914,16 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   private _layoutDebouncer = new Debouncer(() => {
     this._layoutModified.emit(undefined);
   }, 0);
+  private _layoutHooks = new Signal<this, ILabShell.Area>(this);
+  private _panelModules: {
+    header: Map<string, Private.IPanelModule>;
+    top: Map<string, Private.IPanelModule>;
+    bottom: Map<string, Private.IPanelModule>;
+  } = {
+    header: new Map(),
+    top: new Map(),
+    bottom: new Map()
+  };
   private _leftHandler: Private.SideBarHandler;
   private _restored = new PromiseDelegate<ILabShell.ILayout>();
   private _rightHandler: Private.SideBarHandler;
@@ -1832,6 +1963,21 @@ namespace Private {
      * The sort rank of the widget.
      */
     rank: number;
+  }
+
+  /**
+   * An item representing an optional panel module.
+   */
+  export interface IPanelModule extends IRankItem {
+    /**
+     * Identifier of the module.
+     */
+    id: string;
+
+    /**
+     * Whether the module is currently visible.
+     */
+    visible: boolean;
   }
 
   /**
@@ -1972,6 +2118,28 @@ namespace Private {
      */
     get stackedPanel(): StackedPanel {
       return this._stackedPanel;
+    }
+
+    /**
+     * Whether the sidebar should overlay the main content.
+     */
+    get overlay(): boolean {
+      return this._overlay;
+    }
+
+    set overlay(value: boolean) {
+      if (this._overlay === value) {
+        return;
+      }
+      this._overlay = value;
+      if (value) {
+        this._sideBar.addClass('jp-mod-overlay');
+        this._stackedPanel.addClass('jp-mod-overlay');
+      } else {
+        this._sideBar.removeClass('jp-mod-overlay');
+        this._stackedPanel.removeClass('jp-mod-overlay');
+      }
+      this._updated.emit();
     }
 
     /**
@@ -2246,6 +2414,7 @@ namespace Private {
     private _stackedPanel: StackedPanel;
     private _lastCurrent: Widget | null;
     private _updated: Signal<SideBarHandler, void> = new Signal(this);
+    private _overlay = false;
   }
 
   export class SkipLinkWidget extends Widget {
