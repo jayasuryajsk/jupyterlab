@@ -5,6 +5,7 @@
 
 :root {
   --jp-private-menu-panel-height: 27px;
+  --jp-layout-spacing: 5px;
 }
 
 .lm-Widget.lm-mod-hidden {
@@ -13,7 +14,7 @@
 
 .jp-ThemedContainer {
   font-family: var(--jp-ui-font-family);
-  background: var(--jp-layout-color3);
+  background: var(--jp-layout-color2);
   margin: 0;
   padding: 0;
   overflow: hidden;
@@ -28,11 +29,11 @@
 }
 
 .jp-LabShell.jp-mod-devMode {
-  border-top: 4px solid red;
+  border-top: var(--jp-border-width) solid var(--jp-error-color1);
 }
 
 #jp-main-dock-panel {
-  padding: 5px;
+  padding: var(--jp-layout-spacing);
 }
 
 #jp-main-dock-panel[data-mode='single-document'] {
@@ -44,8 +45,8 @@
 }
 
 #jp-top-panel {
-  border-bottom: var(--jp-border-width) solid var(--jp-border-color0);
-  background: var(--jp-layout-color1);
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
+  background: var(--jp-layout-color0);
   display: flex;
   min-height: var(--jp-private-menubar-height);
   overflow: visible;
@@ -57,11 +58,11 @@
 
 #jp-menu-panel {
   min-height: var(--jp-private-menu-panel-height);
-  background: var(--jp-layout-color1);
+  background: var(--jp-layout-color0);
 }
 
 #jp-down-stack {
-  border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
 }
 
 .jp-LabShell[data-shell-mode='single-document'] #jp-top-panel {
@@ -72,7 +73,7 @@
   padding-left: calc(
     var(--jp-private-sidebar-tab-width) + var(--jp-border-width)
   );
-  border-bottom: var(--jp-border-width) solid var(--jp-border-color0);
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
 
   /* Adjust min-height so open menus show up in the right place */
   min-height: calc(
@@ -81,12 +82,26 @@
 }
 
 #jp-bottom-panel {
-  background: var(--jp-layout-color1);
+  background: var(--jp-layout-color0);
   display: flex;
 }
 
 #jp-single-document-mode {
-  margin: 0 8px;
+  margin: 0 calc(var(--jp-layout-spacing) * 1.6);
   display: flex;
   align-items: center;
+}
+
+@media (width <= 600px) {
+  #jp-top-panel {
+    flex-direction: column;
+  }
+
+  #jp-main-dock-panel {
+    padding: calc(var(--jp-layout-spacing) / 2);
+  }
+
+  #jp-single-document-mode {
+    margin: 0 var(--jp-layout-spacing);
+  }
 }
