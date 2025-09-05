@@ -35,24 +35,24 @@ all of MD as it is not optimized for dense, information rich UIs.
 
   /* The dark theme shadows need a bit of work, but this will probably also require work on the core layout
    * colors used in the theme as well. */
-  --jp-shadow-base-lightness: 32;
+  --jp-shadow-base-lightness: 0;
   --jp-shadow-umbra-color: rgba(
     var(--jp-shadow-base-lightness),
     var(--jp-shadow-base-lightness),
     var(--jp-shadow-base-lightness),
-    0.2
+    0.15
   );
   --jp-shadow-penumbra-color: rgba(
     var(--jp-shadow-base-lightness),
     var(--jp-shadow-base-lightness),
     var(--jp-shadow-base-lightness),
-    0.14
+    0.1
   );
   --jp-shadow-ambient-color: rgba(
     var(--jp-shadow-base-lightness),
     var(--jp-shadow-base-lightness),
     var(--jp-shadow-base-lightness),
-    0.12
+    0.05
   );
   --jp-elevation-z0: none;
   --jp-elevation-z1: 0 2px 1px -1px var(--jp-shadow-umbra-color),
@@ -98,11 +98,11 @@ all of MD as it is not optimized for dense, information rich UIs.
    */
 
   --jp-border-width: 1px;
-  --jp-border-color0: white;
-  --jp-border-color1: white;
-  --jp-border-color2: var(--md-grey-300);
-  --jp-border-color3: white;
-  --jp-inverse-border-color: var(--md-grey-600);
+  --jp-border-color0: #ffffff;
+  --jp-border-color1: #ffffff;
+  --jp-border-color2: #e5e7eb;
+  --jp-border-color3: #ffffff;
+  --jp-inverse-border-color: #6e7781;
   --jp-border-radius: 2px;
 
   /* UI Fonts
@@ -120,8 +120,8 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-ui-font-size1: 13px; /* Base font size */
   --jp-ui-font-size2: 1.2em;
   --jp-ui-font-size3: 1.44em;
-  --jp-ui-font-family: system-ui, -apple-system, blinkmacsystemfont, 'Segoe UI',
-    helvetica, arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+  --jp-ui-font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
     'Segoe UI Symbol';
 
   /*
@@ -130,20 +130,20 @@ all of MD as it is not optimized for dense, information rich UIs.
    */
 
   /* Defaults use Material Design specification */
-  --jp-ui-font-color0: rgba(255, 255, 255, 1);
-  --jp-ui-font-color1: rgba(255, 255, 255, 1);
-  --jp-ui-font-color2: rgba(255, 255, 255, 1);
-  --jp-ui-font-color3: rgba(255, 255, 255, 1);
+  --jp-ui-font-color0: #ffffff;
+  --jp-ui-font-color1: #ffffff;
+  --jp-ui-font-color2: #e5e7eb;
+  --jp-ui-font-color3: #9ca3af;
 
   /*
    * Use these against the brand/accent/warn/error colors.
    * These will typically go from light to darker, in both a dark and light theme.
    */
 
-  --jp-ui-inverse-font-color0: white;
-  --jp-ui-inverse-font-color1: black;
-  --jp-ui-inverse-font-color2: white;
-  --jp-ui-inverse-font-color3: white;
+  --jp-ui-inverse-font-color0: #000000;
+  --jp-ui-inverse-font-color1: #000000;
+  --jp-ui-inverse-font-color2: rgba(0, 0, 0, 0.7);
+  --jp-ui-inverse-font-color3: rgba(0, 0, 0, 0.5);
 
   /* Content Fonts
    *
@@ -171,15 +171,15 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-content-heading-font-weight: 500;
 
   /* Defaults use Material Design specification */
-  --jp-content-font-color0: rgba(255, 255, 255, 1);
-  --jp-content-font-color1: rgba(255, 255, 255, 1);
-  --jp-content-font-color2: rgba(255, 255, 255, 0.7);
-  --jp-content-font-color3: rgba(255, 255, 255, 0.5);
-  --jp-content-link-color: var(--md-blue-300);
+  --jp-content-font-color0: #ffffff;
+  --jp-content-font-color1: #ffffff;
+  --jp-content-font-color2: #e5e7eb;
+  --jp-content-font-color3: #9ca3af;
+  --jp-content-link-color: var(--jp-brand-color2);
   --jp-content-link-visited-color: #d979ea;
-  --jp-content-link-hover-color: var(--md-blue-400);
-  --jp-content-font-family: system-ui, -apple-system, blinkmacsystemfont,
-    'Segoe UI', helvetica, arial, sans-serif, 'Apple Color Emoji',
+  --jp-content-link-hover-color: var(--jp-brand-color1);
+  --jp-content-font-family: 'Inter', system-ui, -apple-system, 'Segoe UI',
+    Roboto, 'Helvetica Neue', Arial, sans-serif, 'Apple Color Emoji',
     'Segoe UI Emoji', 'Segoe UI Symbol';
 
   /*
@@ -191,7 +191,8 @@ all of MD as it is not optimized for dense, information rich UIs.
   --jp-code-font-size: 13px;
   --jp-code-line-height: 1.3077; /* 17px for 13px base */
   --jp-code-padding: 5px; /* 5px for 13px base, codemirror highlighting needs integer px value */
-  --jp-code-font-family-default: menlo, consolas, 'DejaVu Sans Mono', monospace;
+  --jp-code-font-family-default: 'Fira Code', Menlo, Consolas,
+    'DejaVu Sans Mono', monospace;
   --jp-code-font-family: var(--jp-code-font-family-default);
 
   /* This gives a magnification of about 125% in presentation mode over normal. */
@@ -208,11 +209,11 @@ all of MD as it is not optimized for dense, information rich UIs.
    * theme these would go from light to dark.
    */
 
-  --jp-layout-color0: #111;
-  --jp-layout-color1: #111;
-  --jp-layout-color2: #424242;
-  --jp-layout-color3: var(--md-grey-700, #616161);
-  --jp-layout-color4: white;
+  --jp-layout-color0: #000000;
+  --jp-layout-color1: #000000;
+  --jp-layout-color2: #374151;
+  --jp-layout-color3: #6b7280;
+  --jp-layout-color4: #ffffff;
 
   /* Inverse Layout
    *
@@ -220,42 +221,42 @@ all of MD as it is not optimized for dense, information rich UIs.
    * theme these would go from dark to light.
    */
 
-  --jp-inverse-layout-color0: white;
-  --jp-inverse-layout-color1: white;
-  --jp-inverse-layout-color2: var(--md-grey-200);
-  --jp-inverse-layout-color3: white;
-  --jp-inverse-layout-color4: var(--md-grey-600);
+  --jp-inverse-layout-color0: #ffffff;
+  --jp-inverse-layout-color1: #ffffff;
+  --jp-inverse-layout-color2: #e5e7eb;
+  --jp-inverse-layout-color3: #ffffff;
+  --jp-inverse-layout-color4: #6e7781;
 
   /* Brand/accent - some colours have been updated to meet WCAG AAA for contrast with text */
 
-  --jp-brand-color0: var(--md-blue-700);
-  --jp-brand-color1: #319bf2;
-  --jp-brand-color2: var(--md-blue-300);
-  --jp-brand-color3: var(--md-blue-100);
-  --jp-brand-color4: var(--md-blue-50);
-  --jp-accent-color0: var(--md-green-700);
-  --jp-accent-color1: var(--md-green-500);
-  --jp-accent-color2: var(--md-green-300);
-  --jp-accent-color3: var(--md-green-100);
+  --jp-brand-color0: #1e40af;
+  --jp-brand-color1: #2563eb;
+  --jp-brand-color2: #60a5fa;
+  --jp-brand-color3: #bfdbfe;
+  --jp-brand-color4: #eff6ff;
+  --jp-accent-color0: #065f46;
+  --jp-accent-color1: #10b981;
+  --jp-accent-color2: #6ee7b7;
+  --jp-accent-color3: #d1fae5;
 
   /* State colors (warn, error, success, info) */
 
-  --jp-warn-color0: var(--md-orange-700);
-  --jp-warn-color1: var(--md-orange-500);
-  --jp-warn-color2: var(--md-orange-300);
-  --jp-warn-color3: var(--md-orange-100);
-  --jp-error-color0: var(--md-red-700);
-  --jp-error-color1: var(--md-red-500);
-  --jp-error-color2: var(--md-red-300);
-  --jp-error-color3: var(--md-red-100);
-  --jp-success-color0: var(--md-green-700);
-  --jp-success-color1: var(--md-green-500);
-  --jp-success-color2: var(--md-green-300);
-  --jp-success-color3: var(--md-green-100);
-  --jp-info-color0: var(--md-cyan-700);
-  --jp-info-color1: var(--md-cyan-500);
-  --jp-info-color2: var(--md-cyan-300);
-  --jp-info-color3: var(--md-cyan-100);
+  --jp-warn-color0: #92400e;
+  --jp-warn-color1: #f59e0b;
+  --jp-warn-color2: #fcd34d;
+  --jp-warn-color3: #fef3c7;
+  --jp-error-color0: #7f1d1d;
+  --jp-error-color1: #dc2626;
+  --jp-error-color2: #fca5a5;
+  --jp-error-color3: #fee2e2;
+  --jp-success-color0: #065f46;
+  --jp-success-color1: #10b981;
+  --jp-success-color2: #6ee7b7;
+  --jp-success-color3: #d1fae5;
+  --jp-info-color0: #155e75;
+  --jp-info-color1: #0ea5e9;
+  --jp-info-color2: #67e8f9;
+  --jp-info-color3: #cffafe;
 
   /* Cell specific styles */
 
