@@ -3094,6 +3094,20 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@jupyterlab/eda-agent@workspace:packages/eda-agent":
+  version: 0.0.0-use.local
+  resolution: "@jupyterlab/eda-agent@workspace:packages/eda-agent"
+  dependencies:
+    "@jupyterlab/application": ^4.5.0-alpha.3
+    "@jupyterlab/apputils": ^4.6.0-alpha.3
+    "@jupyterlab/docregistry": ^4.5.0-alpha.3
+    "@jupyterlab/notebook": ^4.5.0-alpha.3
+    "@lumino/widgets": ^2.7.1
+    rimraf: ~5.0.5
+    typescript: ~5.5.4
+  languageName: unknown
+  linkType: soft
+
 "@jupyterlab/example-app@workspace:examples/app":
   version: 0.0.0-use.local
   resolution: "@jupyterlab/example-app@workspace:examples/app"
